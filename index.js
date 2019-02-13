@@ -3,9 +3,8 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const app = express();
 var cors = require("cors");
-
 var keys = require("./config");
-var service = require("./service");
+var service = require(".");
 var gcm = require("node-gcm");
 
 
@@ -85,7 +84,6 @@ app.post("/cancel", async (req, res) => {
   // Subscribe Route
   app.post("/order", async (req, res) => {
     
-    let balance = await service.returnCompleteBalances(keys.WALLET_ADDRESS);
     let ticker = await service.returnTicker("ETH_" + req.body.token.toString());
     let token = await service.returnCurrency(req.body.token.toString());
     let price = ticker.last * req.body.price;
@@ -127,27 +125,6 @@ app.post("/cancel", async (req, res) => {
       });
   });
 
-// // Get pushSubscription object
-// const subscription = req.body;
-
-// // Send 201 - resource created
-// res.status(201).json({});
-
-// // Create payload
-// const payload = JSON.stringify({ title: "Push Test" });
-
-//     // Prepare a message to be sent
-//     var message = new gcm.Message({
-//         data: { title: 'msg1', message: 'rvskdjfvsjdfvdsjvhsdkjfvsdjfnvsdjfnv' }
-//     });
-
-//   sender.send(message, { registrationTokens: regTokens }, function (err, response) {
-//     if (err) console.error(err);
-//     else console.log(response);
-// });
-
-// });
-
-const port = 5000;
+const port = 8081;
 
 app.listen(port, () => console.log(`Server started on port ${port}`));

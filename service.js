@@ -1,6 +1,6 @@
 module.exports = function() {
     'use strict';
-    const WebSocket = require('ws');
+    // const WebSocket = require('ws');
     const axios = require('axios');
     const ethereumjs = require('ethereumjs-util');
     const web3 = require('web3-utils');
