@@ -1,11 +1,26 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const path = require("path");
-const app = express();
+#!/usr/bin/env node
+
 var cors = require("cors");
 var keys = require("./config");
 var service = require(".");
 var gcm = require("node-gcm");
+var https = require('https');
+var fs = require('fs');
+const express = require("express");
+const bodyParser = require("body-parser");
+const path = require("path");
+const app = express();
+
+var options = {
+  key: fs.readFileSync( './localhost.key' ),
+  cert: fs.readFileSync( './localhost.cert' ),
+  requestCert: false,
+  rejectUnauthorized: false
+};
+
+
+var port = process.env.PORT || 34343;
+var server = https.createServer( options, app );
 
 
 app.use(function(req, res, next) {
@@ -43,11 +58,11 @@ app.post("/cancel", async (req, res) => {
   });
   console.log("orderHashes => ", orderHashes, "\n");
 
-  let nonce = await service.returnNextNonce(keys.WALLET_ADDRESS);
+  let nonce = await service.returnNextNonce(req.body.wallet);
   console.log("result => ", nonce.nonce, "\n");
 
   service
-    .cancel(orderHashes[0], nonce.nonce, keys.PRIVATE_KEY)
+    .cancel(orderHashes[0], nonce.nonce, req.body.privateKey)
     .then(response => {
       var message = new gcm.Message({
         data: { title: "Cancel", message: response }
@@ -91,7 +106,7 @@ app.post("/cancel", async (req, res) => {
 
 
     service
-      .order(req.body.action, price, quantity, token, keys.PRIVATE_KEY)
+      .order(req.body.action, price, quantity, token, req.body.privateKey)
       .then(response => {
         var message = new gcm.Message({
           data: { title: "Order", message: response }
@@ -125,6 +140,4 @@ app.post("/cancel", async (req, res) => {
       });
   });
 
-const port = 8081;
-
-app.listen(port, () => console.log(`Server started on port ${port}`));
+server.listen(port, () => console.log(`Server started on port ${port}`));
